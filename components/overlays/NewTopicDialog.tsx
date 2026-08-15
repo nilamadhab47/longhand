@@ -132,7 +132,7 @@ export function NewTopicDialog({
                 setNewFolder(event.target.value);
                 setError(null);
               }}
-              placeholder="Anthropology"
+              placeholder="Library"
               className="mt-1 w-full border border-line bg-panel px-2 py-1.5 font-mono text-[13px] text-ink placeholder:text-ink-3"
             />
           </label>
@@ -149,7 +149,7 @@ export function NewTopicDialog({
               setTitle(event.target.value);
               setError(null);
             }}
-            placeholder="Meaning, Scope and Development"
+            placeholder="First page"
             className="mt-1 w-full border border-line bg-panel px-2 py-1.5 font-serif text-[15.5px] text-ink placeholder:text-ink-3"
           />
         </label>

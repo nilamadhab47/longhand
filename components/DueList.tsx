@@ -19,7 +19,7 @@ export function DueList({ groups }: { groups: { folder: string; notes: DueTopic[
   if (groups.length === 0) {
     return (
       <p className="mt-4 font-serif text-[15.5px] italic leading-[1.72] text-ink-2">
-        Nothing due. Write a note that uses its keywords, then come back.
+        Nothing due. Open New topic when you are ready to write.
       </p>
     );
   }

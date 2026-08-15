@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { createSession, destroySession } from "@/lib/session";
-import { seedStarterTopic } from "@/lib/seed-topic";
 
 export type AuthState = { error: string } | undefined;
 
@@ -58,7 +57,6 @@ export async function signUp(
     },
   });
 
-  await seedStarterTopic(user.id);
   await createSession(user.id, user.email);
   redirect("/review");
 }
