@@ -2,7 +2,7 @@ import { jwtVerify } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
 
 const SESSION_COOKIE = "longhand_session";
-const PUBLIC_PATHS = ["/sign-in", "/sign-up"];
+const PUBLIC_PATHS = ["/", "/sign-in", "/sign-up"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some(
@@ -32,9 +32,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (signedIn && publicRoute) {
+  if (signedIn && (pathname === "/sign-in" || pathname === "/sign-up")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/review";
     return NextResponse.redirect(url);
   }
 

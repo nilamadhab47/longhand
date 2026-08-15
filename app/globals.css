@@ -76,6 +76,10 @@
   border-color: var(--line);
 }
 
+html {
+  color-scheme: light;
+}
+
 html,
 body {
   background: var(--paper);
@@ -171,6 +175,47 @@ body[data-scroll-locked] {
   100% {
     box-shadow: inset 0 -2px 0 0 transparent;
   }
+}
+
+.landing {
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100dvh;
+}
+
+.landing-display {
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+}
+
+.landing-grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.landing-orb {
+  pointer-events: none;
+  position: absolute;
+  width: 52vw;
+  height: 52vw;
+  max-width: 640px;
+  max-height: 640px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(163, 47, 42, 0.14) 0%,
+    rgba(196, 140, 72, 0.08) 42%,
+    transparent 70%
+  );
+  filter: blur(8px);
+}
+
+.landing-card {
+  background: #f7f5ee;
 }
 
 @media (prefers-reduced-motion: reduce) {

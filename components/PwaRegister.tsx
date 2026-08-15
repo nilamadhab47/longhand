@@ -13,6 +13,18 @@ export function PwaRegister() {
       return;
     }
 
+    if (process.env.NODE_ENV === "development") {
+      void navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const reg of regs) void reg.unregister();
+      });
+      void caches.keys().then((keys) => {
+        for (const key of keys) {
+          if (key.startsWith("longhand-")) void caches.delete(key);
+        }
+      });
+      return;
+    }
+
     let cancelled = false;
 
     const trackWaiting = (worker: ServiceWorker | null) => {

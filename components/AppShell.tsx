@@ -67,9 +67,9 @@ export function AppShell({
       </button>
       <p className="px-3 pb-2 font-mono text-[11px] text-ink-3">{email}</p>
       <Link
-        href="/"
+        href="/review"
         className={`mx-3 mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
-          pathname === "/" ? "text-rule" : "text-ink-3 hover:text-rule"
+          pathname === "/review" ? "text-rule" : "text-ink-3 hover:text-rule"
         }`}
       >
         Review

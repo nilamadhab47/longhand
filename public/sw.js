@@ -96,11 +96,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (
-    url.pathname === "/" ||
-    url.pathname.startsWith("/n/") ||
-    url.pathname === "/sign-in"
-  ) {
+  if (url.pathname === "/") {
+    event.respondWith(networkFirst(request, CACHES.pages));
+    return;
+  }
+
+  if (url.pathname.startsWith("/n/") || url.pathname === "/sign-in") {
     event.respondWith(staleWhileRevalidate(event, CACHES.pages));
     return;
   }
@@ -115,6 +116,19 @@ async function cacheFirst(request, cacheName) {
     if (response.ok) await cache.put(request, response.clone());
     return response;
   } catch (error) {
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
     if (cached) return cached;
     throw error;
   }

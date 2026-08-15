@@ -31,7 +31,7 @@ export async function signIn(
   }
 
   await createSession(user.id, user.email);
-  redirect("/");
+  redirect("/review");
 }
 
 export async function signUp(
@@ -60,7 +60,7 @@ export async function signUp(
 
   await seedStarterTopic(user.id);
   await createSession(user.id, user.email);
-  redirect("/");
+  redirect("/review");
 }
 
 export async function signOut() {
