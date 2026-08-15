@@ -1,0 +1,213 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  binaryTargets   = ["native"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum ExamPaper {
+  GS1
+  GS2
+  GS3
+  GS4
+  OPTIONAL_ANTHROPOLOGY
+  ESSAY
+  PRELIMS_GS
+  PRELIMS_CSAT
+}
+
+enum SectionKind {
+  KEYWORDS
+  QUOTATIONS
+  NOTES
+  QUESTIONS
+}
+
+enum QuotationSource {
+  SCHOLAR
+  JUDGMENT
+  COMMITTEE_REPORT
+  CONSTITUENT_ASSEMBLY
+  ARTICLE_TEXT
+  OTHER
+}
+
+enum QuestionKind {
+  MCQ
+  PRELIMS_STATEMENT
+  MAINS_DESCRIPTIVE
+}
+
+enum QuestionOrigin {
+  USER_WRITTEN
+  AI_EXTRACTED
+  PYQ_LINKED
+}
+
+enum AuditStatus {
+  UNAUDITED
+  PENDING
+  PASSED
+  FLAGGED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  folders   Folder[]
+  notes     Note[]
+  questions Question[]
+  attempts  Attempt[]
+
+  @@map("users")
+}
+
+model Folder {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name     String
+  parentId String?
+  parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Folder[] @relation("FolderTree")
+
+  depth        Int        @default(0)
+  defaultPaper ExamPaper?
+  position     Int        @default(0)
+
+  notes     Note[]
+  createdAt DateTime @default(now())
+
+  @@index([userId, parentId])
+  @@map("folders")
+}
+
+model Note {
+  id       String    @id @default(cuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId String
+  folder   Folder    @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  title String
+  paper ExamPaper
+  position Int @default(0)
+
+  sections  NoteSection[]
+  questions Question[]
+
+  easeFactor     Float     @default(2.5)
+  intervalDays   Int       @default(0)
+  repetitions    Int       @default(0)
+  nextReviewAt   DateTime?
+  lastReviewedAt DateTime?
+
+  embedding          Unsupported("vector(1536)")?
+  syllabusMatchCache Json?
+  auditResult        Json?
+  auditStatus        AuditStatus @default(UNAUDITED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([folderId, title])
+  @@index([userId, nextReviewAt])
+  @@map("notes")
+}
+
+model NoteSection {
+  id     String @id @default(cuid())
+  noteId String
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  kind     SectionKind
+  position Int
+
+  keywords String[] @default([])
+  content  String?  @db.Text
+
+  quotations Quotation[]
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([noteId, kind])
+  @@map("note_sections")
+}
+
+model Quotation {
+  id        String      @id @default(cuid())
+  sectionId String
+  section   NoteSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  text         String          @db.Text
+  attributedTo String
+  sourceType   QuotationSource
+  year         Int?
+  position     Int             @default(0)
+
+  @@index([sourceType, attributedTo])
+  @@map("quotations")
+}
+
+model Question {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  noteId String?
+  note   Note?  @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  kind   QuestionKind
+  origin QuestionOrigin
+
+  stem           String   @db.Text
+  options        String[] @default([])
+  correctIndices Int[]    @default([])
+  explanation    String?  @db.Text
+
+  attempts  Attempt[]
+  createdAt DateTime  @default(now())
+
+  @@index([userId, noteId])
+  @@map("questions")
+}
+
+model Attempt {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  selectedIndices Int[]    @default([])
+  writtenAnswer   String?  @db.Text
+  isCorrect       Boolean?
+  auditResult     Json?
+
+  attemptedAt DateTime @default(now())
+
+  @@index([questionId, attemptedAt])
+  @@map("attempts")
+}
+
+model PasteRouteCache {
+  hash      String   @id
+  result    Json
+  createdAt DateTime @default(now())
+
+  @@map("paste_route_cache")
+}
+
+model ApiSpend {
+  month String @id
+  usd   Float  @default(0)
+
+  @@map("api_spend")
+}

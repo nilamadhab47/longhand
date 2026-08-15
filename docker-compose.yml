@@ -1,0 +1,20 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: longhand-db
+    environment:
+      POSTGRES_USER: longhand
+      POSTGRES_PASSWORD: longhand
+      POSTGRES_DB: longhand
+    ports:
+      - "5432:5432"
+    volumes:
+      - longhand_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U longhand -d longhand"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  longhand_pg:

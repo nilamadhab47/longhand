@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #EDEFE9;
+  --panel: #E2E5DC;
+  --sunk: #D8DCD1;
+  --ink: #161D26;
+  --ink-2: #4C5665;
+  --ink-3: #7C8695;
+  --rule: #A32F2A;
+  --brass: #7A6A2F;
+  --line: #C9CFC1;
+  --ok: #3F6B4A;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--panel);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--rule);
+  --primary-foreground: var(--paper);
+  --secondary: var(--panel);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sunk);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--sunk);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rule);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--rule);
+  --radius: 2px;
 }
 
 @theme inline {
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-brass: var(--brass);
+  --color-line: var(--line);
+  --color-ok: var(--ok);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-plex-sans);
+  --font-serif: var(--font-plex-serif);
+  --font-mono: var(--font-plex-mono);
+  --radius-sm: calc(var(--radius) - 1px);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
+* {
+  border-color: var(--line);
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), "IBM Plex Sans Condensed", sans-serif;
+  font-size: 14px;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+@supports (padding: env(safe-area-inset-top)) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (display-mode: standalone), (display-mode: window-controls-overlay) {
+  /* When installed, keep the paper bg all the way to the edges. */
+  html,
+  body {
+    background: var(--paper);
+  }
+}
+
+/* When any Radix overlay is open, prevent body scroll bleed on iOS. */
+body[data-scroll-locked] {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+
+/* Bigger tap targets on coarse pointers (touch). */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  [role="menuitem"] {
+    min-height: 36px;
+  }
+}
+
+*:focus-visible {
+  outline: 2px solid var(--rule);
+  outline-offset: 2px;
+}
+
+[data-notes-editor] p {
+  margin: 0 0 0.7em;
+}
+
+[data-notes-editor] p:last-child {
+  margin-bottom: 0;
+}
+
+[data-notes-editor] u {
+  text-underline-offset: 2px;
+}
+
+.assist-flash {
+  animation: assist-underline 1.6s ease-out forwards;
+  text-decoration-line: underline;
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+@keyframes assist-underline {
+  0% {
+    background-color: color-mix(in oklab, var(--rule) 14%, transparent);
+    text-decoration-color: var(--rule);
+  }
+  70% {
+    background-color: color-mix(in oklab, var(--rule) 6%, transparent);
+    text-decoration-color: color-mix(in oklab, var(--rule) 60%, transparent);
+  }
+  100% {
+    background-color: transparent;
+    text-decoration-color: transparent;
+  }
+}
+
+[data-assist-flash-host] {
+  animation: assist-outline 1.6s ease-out forwards;
+}
+
+@keyframes assist-outline {
+  0% {
+    box-shadow: inset 0 -2px 0 0 var(--rule);
+  }
+  100% {
+    box-shadow: inset 0 -2px 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
