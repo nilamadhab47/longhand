@@ -45,7 +45,7 @@ export function QuestionsPane({
     <div>
       {questions.length === 0 ? (
         <p className="mb-4 font-serif text-[15.5px] italic leading-[1.72] text-ink-2">
-          Write one you'd struggle to answer — that's the one worth keeping.
+          Write one you would struggle to answer — that is the one worth keeping.
         </p>
       ) : (
         <ul className="space-y-4">
