@@ -1,6 +1,7 @@
 import { callForcedTool, hashBytes } from "@/lib/ai/haiku";
 
 export type AssistOperation = "spell" | "rewrite" | "proofread";
+export type DictateTarget = "notes" | "keywords";
 export type AssistMode = "notes" | "prose" | "academic";
 
 export type ProofSeverity = "issue" | "suggestion";
@@ -162,6 +163,54 @@ Rules:
 - If the selection is already clear, return it verbatim with changed=false and a short note explaining why.
 - "note" is a one-line explanation of what you changed (or why you didn't).`,
     userText: contextBlock(input),
+  });
+}
+
+const DICTATE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["items", "changed"],
+  properties: {
+    items: {
+      type: "array",
+      items: { type: "string" },
+    },
+    changed: { type: "boolean" },
+  },
+} as const;
+
+export async function assistDictateRefine(input: {
+  transcript: string;
+  target: DictateTarget;
+  topic?: string;
+}) {
+  return callForcedTool<{ items: string[]; changed: boolean }>({
+    cacheKey: hashBytes(
+      `assist_dictate\n${input.target}\n${input.topic ?? ""}\n${input.transcript}`,
+    ),
+    toolName: "refine_dictation",
+    description:
+      "Clean a spoken transcript. Keep the speaker's meaning. Do not invent content.",
+    schema: DICTATE_SCHEMA,
+    system: `${SHARED_INTENT}
+OPERATION: REFINE_DICTATION.
+The user spoke these words. They are the author. You only tidy the transcript.
+Rules:
+- Remove filler (um, uh, like, you know), false starts, and repeated stutters.
+- Add punctuation and light grammar so the text is readable.
+- Do not add facts, names, cases, thinkers, or ideas that were not spoken.
+- Do not expand a short spoken note into an essay.
+- If TARGET is "notes": return exactly one item — the whole take as a single study note. Do not split into bullets or separate points. Fragments are correct.
+- If TARGET is "keywords": return short term chips the speaker named. Split lists. Keep proper nouns. Do not invent extra terms.
+- If the transcript is already clean, return it as items with changed=false.
+- items must never be empty if the transcript has words.`,
+    userText: [
+      `TARGET: ${input.target}`,
+      input.topic ? `DOCUMENT_TOPIC: ${input.topic}` : null,
+      `TRANSCRIPT:\n${input.transcript}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   });
 }
 

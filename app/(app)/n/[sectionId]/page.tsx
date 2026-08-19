@@ -65,7 +65,11 @@ export default async function SectionPage({
         {section.note.title}
       </h1>
       {section.kind === SectionKind.KEYWORDS ? (
-        <KeywordsPane sectionId={section.id} keywords={section.keywords} />
+        <KeywordsPane
+          sectionId={section.id}
+          keywords={section.keywords}
+          topic={section.note.title}
+        />
       ) : null}
       {section.kind === SectionKind.QUOTATIONS ? (
         <QuotationsPane

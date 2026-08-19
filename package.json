@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
+    "@elevenlabs/client": "^1.20.0",
     "@prisma/client": "^6.19.3",
     "@radix-ui/react-context-menu": "^2.3.7",
     "@radix-ui/react-popover": "^1.1.23",

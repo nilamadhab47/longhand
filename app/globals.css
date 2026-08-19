@@ -218,6 +218,69 @@ body[data-scroll-locked] {
   background: #f7f5ee;
 }
 
+.dictate-dot-ring {
+  animation: dictate-ring 1.8s ease-out infinite;
+}
+
+@keyframes dictate-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.dictate-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+}
+
+.dictate-bar {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--rule);
+  opacity: 0.35;
+  height: 5px;
+}
+
+.dictate-live[data-active="true"] .dictate-bar {
+  opacity: 1;
+  animation: dictate-pulse 0.9s ease-in-out infinite;
+}
+
+.dictate-bar:nth-child(1) {
+  animation-delay: 0ms;
+}
+.dictate-bar:nth-child(2) {
+  animation-delay: 120ms;
+}
+.dictate-bar:nth-child(3) {
+  animation-delay: 240ms;
+}
+.dictate-bar:nth-child(4) {
+  animation-delay: 80ms;
+}
+.dictate-bar:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+@keyframes dictate-pulse {
+  0%,
+  100% {
+    height: 4px;
+    opacity: 0.4;
+  }
+  50% {
+    height: 14px;
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

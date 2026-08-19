@@ -1,8 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addKeyword, removeKeyword, replaceKeyword } from "@/app/actions/sections";
+import {
+  addKeyword,
+  addKeywords,
+  removeKeyword,
+  replaceKeyword,
+} from "@/app/actions/sections";
 import { runAssist } from "@/app/actions/assist";
+import { DictateControl } from "@/components/DictateControl";
 import {
   interceptRoutedPaste,
   usePasteRouter,
@@ -12,9 +18,11 @@ import { localSpellSuggestion, looksMisspelled } from "@/lib/spell";
 export function KeywordsPane({
   sectionId,
   keywords,
+  topic,
 }: {
   sectionId: string;
   keywords: string[];
+  topic?: string;
 }) {
   const [draft, setDraft] = useState("");
   const [pending, startTransition] = useTransition();
@@ -62,6 +70,15 @@ export function KeywordsPane({
         placeholder={pending ? "Saving…" : "Type a term, then Enter"}
         className="mt-3 w-full border border-line bg-panel px-2 py-1.5 font-mono text-[13px] text-ink placeholder:text-ink-3"
       />
+      <div className="mt-2">
+        <DictateControl
+          target="keywords"
+          topic={topic}
+          onApply={(items) => {
+            startTransition(() => addKeywords(sectionId, items));
+          }}
+        />
+      </div>
     </div>
   );
 }

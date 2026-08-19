@@ -24,20 +24,29 @@ function refresh(sectionId: string) {
 }
 
 export async function addKeyword(sectionId: string, raw: string) {
+  await addKeywords(sectionId, [raw]);
+}
+
+export async function addKeywords(sectionId: string, raw: string[]) {
   const { userId } = await requireUser();
   const section = await ownedSection(sectionId, userId);
   if (!section || section.kind !== SectionKind.KEYWORDS) return;
 
-  const keyword = raw.trim();
-  if (keyword.length === 0) return;
-  const exists = section.keywords.some(
-    (item) => item.toLowerCase() === keyword.toLowerCase(),
-  );
-  if (exists) return;
+  const seen = new Set(section.keywords.map((item) => item.toLowerCase()));
+  const extras: string[] = [];
+  for (const value of raw) {
+    const keyword = value.trim();
+    if (keyword.length === 0) continue;
+    const key = keyword.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    extras.push(keyword);
+  }
+  if (extras.length === 0) return;
 
   await prisma.noteSection.update({
     where: { id: sectionId },
-    data: { keywords: [...section.keywords, keyword] },
+    data: { keywords: [...section.keywords, ...extras] },
   });
   refresh(sectionId);
 }

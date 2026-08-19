@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, Pencil, Plus, Square, Trash2, Volume2 } from "lucide-react";
 import { saveNotes } from "@/app/actions/sections";
+import { DictateControl } from "@/components/DictateControl";
 import { ClozeDrill } from "@/components/overlays/ClozeDrill";
 import { PasteGuard } from "@/components/overlays/PasteGuard";
 import { NotesEditor } from "@/components/panes/NotesEditor";
@@ -167,27 +168,45 @@ export function NotesPane({
     setEditingId(null);
   }
 
+  function addFromDictation(items: string[]) {
+    const text = items
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .join(" ");
+    if (!text) return;
+    addFromPaste([text]);
+  }
+
   return (
     <div>
-      <div className="mb-3 flex items-center gap-1">
-        <IconButton
-          label={speaking ? "Stop reading" : "Read aloud"}
-          disabled={plain.length === 0}
-          onClick={toggleRead}
-        >
-          {speaking ? (
-            <Square size={14} strokeWidth={1.75} />
-          ) : (
-            <Volume2 size={14} strokeWidth={1.75} />
-          )}
-        </IconButton>
-        <button
-          type="button"
-          onClick={() => setDrillOpen(true)}
-          className="ml-1 font-mono text-[11px] uppercase tracking-[0.08em] text-rule hover:underline"
-        >
-          Recall
-        </button>
+      <div className="mb-3">
+        <div className="flex flex-wrap items-center gap-1">
+          <IconButton
+            label={speaking ? "Stop reading" : "Read aloud"}
+            disabled={plain.length === 0}
+            onClick={toggleRead}
+          >
+            {speaking ? (
+              <Square size={14} strokeWidth={1.75} />
+            ) : (
+              <Volume2 size={14} strokeWidth={1.75} />
+            )}
+          </IconButton>
+          <button
+            type="button"
+            onClick={() => setDrillOpen(true)}
+            className="ml-1 font-mono text-[11px] uppercase tracking-[0.08em] text-rule hover:underline"
+          >
+            Recall
+          </button>
+        </div>
+        <div className="mt-2">
+          <DictateControl
+            target="notes"
+            topic={title}
+            onApply={addFromDictation}
+          />
+        </div>
       </div>
       {points.length === 0 ? (
         <p className="mb-3 font-serif text-[15.5px] italic leading-[1.72] text-ink-2">
