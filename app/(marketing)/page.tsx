@@ -200,7 +200,15 @@ export default async function HomePage() {
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-3">
           longhand
         </p>
-        <p className="font-serif italic text-ink-3">Think. Type. Continue.</p>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/support"
+            className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-3 hover:text-rule"
+          >
+            Support
+          </Link>
+          <p className="font-serif italic text-ink-3">Think. Type. Continue.</p>
+        </div>
       </footer>
     </div>
   );

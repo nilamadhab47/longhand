@@ -88,14 +88,32 @@ export function AppShell({
           onNewTopic={(folderId) => setNewTopicFolder(folderId)}
         />
       </div>
-      <form action={signOut} className="border-t border-line px-3 py-2">
-        <button
-          type="submit"
-          className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3 hover:text-rule"
+      <div className="border-t border-line px-3 py-2">
+        <Link
+          href="/support"
+          className={`mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
+            pathname === "/support" ? "text-rule" : "text-ink-3 hover:text-rule"
+          }`}
         >
-          Sign out
-        </button>
-      </form>
+          Support
+        </Link>
+        <Link
+          href="/inbox"
+          className={`mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
+            pathname === "/inbox" ? "text-rule" : "text-ink-3 hover:text-rule"
+          }`}
+        >
+          Inbox
+        </Link>
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3 hover:text-rule"
+          >
+            Sign out
+          </button>
+        </form>
+      </div>
     </>
   );
 

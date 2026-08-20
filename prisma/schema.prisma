@@ -66,6 +66,7 @@ model User {
   notes     Note[]
   questions Question[]
   attempts  Attempt[]
+  feedback  Feedback[]
 
   @@map("users")
 }
@@ -210,4 +211,27 @@ model ApiSpend {
   usd   Float  @default(0)
 
   @@map("api_spend")
+}
+
+enum FeedbackKind {
+  ISSUE
+  IDEA
+  OTHER
+}
+
+model Feedback {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  kind  FeedbackKind
+  body  String       @db.Text
+  doing String?
+
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@map("feedback")
 }
