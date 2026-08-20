@@ -127,7 +127,8 @@ export async function createTopicPath(
   const parsed = parseTopicPath(rawPath);
   if (!parsed.ok) return parsed;
 
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(
+    async (tx) => {
     let parentId: string | null = null;
     let parentPaper: ExamPaper | null = null;
     let created = false;
@@ -187,7 +188,9 @@ export async function createTopicPath(
     });
     const sectionId = await sectionIdByKind(tx, note.id, SectionKind.NOTES);
     return { ok: true, sectionId, created: true };
-  });
+  },
+  { timeout: 15000, maxWait: 10000 },
+  );
 }
 
 export async function createTopicInFolder(
@@ -239,7 +242,7 @@ export async function createTopicInFolder(
     });
     const sectionId = await sectionIdByKind(tx, note.id, SectionKind.NOTES);
     return { ok: true, sectionId, created: true };
-  });
+  }, { timeout: 15000, maxWait: 10000 });
 }
 
 function paperForFolder(
