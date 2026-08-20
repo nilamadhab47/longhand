@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Logo } from "@/components/Logo";
+import { OnboardingGuide } from "@/components/OnboardingGuide";
 import { GlobalSearch } from "@/components/overlays/GlobalSearch";
 import { NewTopicDialog } from "@/components/overlays/NewTopicDialog";
 import { NoteTree } from "@/components/tree/NoteTree";
@@ -29,7 +30,8 @@ export function AppShell({
   const [newTopicFolder, setNewTopicFolder] = useState<string | null | false>(
     false,
   );
-
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideFromStart, setGuideFromStart] = useState(false);
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
@@ -89,6 +91,13 @@ export function AppShell({
         />
       </div>
       <div className="border-t border-line px-3 py-2">
+        <button
+          type="button"
+          onClick={() => { setGuideFromStart(true); setGuideOpen(true); }}
+          className="mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3 hover:text-rule"
+        >
+          Guide
+        </button>
         <Link
           href="/support"
           className={`mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
@@ -203,6 +212,11 @@ export function AppShell({
           onClose={() => setNewTopicFolder(false)}
         />
       ) : null}
+      <OnboardingGuide
+        open={guideOpen}
+        fromStart={guideFromStart}
+        onOpenChange={(next) => { setGuideOpen(next); if (!next) setGuideFromStart(false); }}
+      />
     </div>
   );
 }
