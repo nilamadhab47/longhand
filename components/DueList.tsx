@@ -19,7 +19,8 @@ export function DueList({ groups }: { groups: { folder: string; notes: DueTopic[
   if (groups.length === 0) {
     return (
       <p className="mt-4 font-serif text-[15.5px] italic leading-[1.72] text-ink-2">
-        Nothing due. Open New topic when you are ready to write.
+        Nothing due. Write a note first — once it has words, it appears here
+        so you can test whether you still know it.
       </p>
     );
   }
@@ -51,6 +52,7 @@ export function DueList({ groups }: { groups: { folder: string; notes: DueTopic[
                   </div>
                   <button
                     type="button"
+                    data-guide="drill"
                     onClick={() => setDrill(note)}
                     className="shrink-0 font-mono text-[11px] uppercase tracking-[0.08em] text-rule hover:underline"
                   >

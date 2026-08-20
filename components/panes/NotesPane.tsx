@@ -8,6 +8,7 @@ import { ClozeDrill } from "@/components/overlays/ClozeDrill";
 import { PasteGuard } from "@/components/overlays/PasteGuard";
 import { NotesEditor } from "@/components/panes/NotesEditor";
 import { escapeText, stripHtml, toEditorHtml } from "@/lib/html";
+import { guideEvent } from "@/lib/onboarding";
 import {
   emptyPoint,
   notesWordCount,
@@ -143,6 +144,7 @@ export function NotesPane({
     const point = emptyPoint();
     setPoints((current) => [...current, point]);
     setEditingId(point.id);
+    guideEvent("note-added");
   }
 
   function deletePoint(id: string) {
@@ -274,7 +276,12 @@ export function NotesPane({
         })}
       </ul>
       <div className="mt-2">
-        <IconButton label="Add point" onClick={addPoint} tone="rule">
+        <IconButton
+          label="Add point"
+          onClick={addPoint}
+          tone="rule"
+          guide="add-note"
+        >
           <Plus size={14} strokeWidth={1.75} />
         </IconButton>
       </div>
@@ -325,12 +332,14 @@ function IconButton({
   children,
   disabled = false,
   tone = "muted",
+  guide,
 }: {
   label: string;
   onClick: () => void;
   children: ReactNode;
   disabled?: boolean;
   tone?: "muted" | "rule";
+  guide?: string;
 }) {
   return (
     <button
@@ -338,6 +347,7 @@ function IconButton({
       aria-label={label}
       title={label}
       disabled={disabled}
+      data-guide={guide}
       onClick={onClick}
       className={`p-1 disabled:opacity-40 ${
         tone === "rule"

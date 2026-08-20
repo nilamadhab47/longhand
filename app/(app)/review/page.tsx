@@ -49,12 +49,23 @@ export default async function ReviewPage() {
           due today
         </p>
         <p className="mt-2 font-serif text-[13px] italic leading-snug text-ink-2">
-          Topics whose interval has come due. Drill, then rate 0–5.
+          A list of notes ready to test. Recall first, then rate.
         </p>
       </div>
       <div className="min-w-0 flex-1 border-l-[2px] border-rule px-4 py-5 sm:px-6">
-        <h1 className="font-sans text-[14px] font-medium text-ink">Review</h1>
-        <p className="mt-1 font-mono text-[12px] text-ink-3">
+        <h1
+          data-guide="review-page"
+          className="font-sans text-[14px] font-medium text-ink"
+        >
+          Review
+        </h1>
+        <p className="mt-1 max-w-xl font-serif text-[15.5px] leading-[1.72] text-ink-2">
+          This is not a feed. It is a queue of notes whose turn has come.
+          Open <span className="text-ink">Drill</span>, try to say the note
+          from the title, reveal what you wrote, then rate 0–5. A low score
+          brings it back tomorrow. A high score waits longer.
+        </p>
+        <p className="mt-2 font-mono text-[12px] text-ink-3">
           {due.length} due
         </p>
         <DueList groups={groups} />

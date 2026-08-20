@@ -39,7 +39,7 @@ export function NoteTree({
   if (folders.length === 0) {
     return (
       <p className="px-3 py-2 font-serif text-[13px] italic text-ink-2">
-        New topic to plant the first folder.
+        <span data-guide="files">New topic to plant the first folder.</span>
       </p>
     );
   }

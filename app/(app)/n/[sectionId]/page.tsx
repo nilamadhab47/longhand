@@ -57,6 +57,7 @@ export default async function SectionPage({
         sectionId={section.id}
         topic={section.note.title}
         mode={section.kind === SectionKind.NOTES ? "notes" : "prose"}
+        sectionKind={section.kind.toLowerCase()}
       >
       <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-brass">
         {section.note.folder.name}

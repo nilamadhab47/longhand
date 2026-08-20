@@ -74,7 +74,7 @@ export function TopicRow({
         />
       </div>
       {open ? (
-        <ul>
+        <ul data-guide="files">
           {note.sections.map((section) => (
             <SectionRow
               key={section.id}
@@ -111,6 +111,17 @@ function SectionRow({
         <Link
           href={`/n/${section.id}`}
           aria-current={active ? "page" : undefined}
+          data-guide={
+            section.kind === SectionKind.NOTES
+              ? "notes-file"
+              : section.kind === SectionKind.KEYWORDS
+                ? "keywords-file"
+                : section.kind === SectionKind.QUOTATIONS
+                  ? "quotations-file"
+                  : section.kind === SectionKind.QUESTIONS
+                    ? "questions-file"
+                    : undefined
+          }
           className="flex min-w-0 flex-1 items-center gap-1"
         >
           <span className="w-3 shrink-0" aria-hidden />

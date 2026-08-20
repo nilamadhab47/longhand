@@ -9,6 +9,7 @@ import {
 } from "@elevenlabs/client";
 import { Mic, Square } from "lucide-react";
 import { DictateReview } from "@/components/overlays/DictateReview";
+import { guideEvent } from "@/lib/onboarding";
 import {
   describeSpeechError,
   isSpeechRecognitionSupported,
@@ -368,7 +369,11 @@ export function DictateControl({
       ) : (
         <button
           type="button"
-          onClick={start}
+          data-guide="speak"
+          onClick={() => {
+            start();
+            guideEvent("speak-used");
+          }}
           disabled={!ready}
           className="inline-flex items-center gap-1.5 border border-line bg-panel px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-2 transition-colors duration-200 hover:border-rule hover:text-rule disabled:opacity-40"
         >

@@ -11,6 +11,7 @@ import {
   interceptRoutedPaste,
   usePasteRouter,
 } from "@/components/SmartPasteHost";
+import { guideEvent } from "@/lib/onboarding";
 
 const ORIGIN_LABEL: Record<QuestionOrigin, string> = {
   USER_WRITTEN: "written by me",
@@ -189,11 +190,12 @@ function AddQuestionForm({ sectionId }: { sectionId: string }) {
       setOptions(["", "", "", ""]);
       setCorrect([]);
       setError(null);
+      guideEvent("question-added");
     });
   }
 
   return (
-    <div className="mt-6 space-y-2 border-t border-line pt-4">
+    <div data-guide="question-form" className="mt-6 space-y-2 border-t border-line pt-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3">
         Write a question
       </p>
@@ -207,8 +209,14 @@ function AddQuestionForm({ sectionId }: { sectionId: string }) {
         <option value={QuestionKind.MAINS_DESCRIPTIVE}>Mains descriptive</option>
       </select>
       <textarea
+        data-guide="question-stem"
         value={stem}
-        onChange={(event) => setStem(event.target.value)}
+        onChange={(event) => {
+          setStem(event.target.value);
+          if (event.target.value.trim().length > 0) {
+            guideEvent("question-stem-filled");
+          }
+        }}
         onPaste={(event) =>
           interceptRoutedPaste(event, paste, (pasted) => pasted.length > 80)
         }
@@ -251,6 +259,7 @@ function AddQuestionForm({ sectionId }: { sectionId: string }) {
       ) : null}
       <button
         type="button"
+        data-guide="save-question"
         disabled={pending}
         onClick={submit}
         className="border border-rule bg-rule px-3 py-1.5 font-sans text-[13px] font-medium text-paper disabled:opacity-40"

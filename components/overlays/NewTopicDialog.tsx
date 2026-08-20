@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { createTopic } from "@/app/actions/scaffold";
+import { guideEvent } from "@/lib/onboarding";
 import type { TreeFolder } from "@/lib/tree-types";
 
 export function flattenFolders(
@@ -47,6 +48,10 @@ export function NewTopicDialog({
   const needsFolderName = options.length === 0 || selectedFolder === "";
 
   useEffect(() => {
+    guideEvent("new-topic-dialog-opened");
+    if (options.length > 0 && (folderId ?? options[0]?.id ?? "") !== "") {
+      setTimeout(() => guideEvent("folder-filled"), 100);
+    }
     const focusId = window.setTimeout(() => titleRef.current?.focus(), 0);
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
@@ -56,7 +61,9 @@ export function NewTopicDialog({
       window.clearTimeout(focusId);
       window.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -75,12 +82,13 @@ export function NewTopicDialog({
         router.push(`/n/${result.sectionId}`);
       }
       router.refresh();
+      guideEvent("topic-created");
     });
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-ink/25 pt-[18vh]"
+      className="fixed inset-0 z-[65] flex items-start justify-center bg-ink/25 pt-[18vh]"
       onClick={onClose}
     >
       <form
@@ -102,13 +110,16 @@ export function NewTopicDialog({
         </p>
 
         {options.length > 0 ? (
-          <label className="mt-3 block">
+          <label className="mt-3 block" data-guide="folder-select">
             <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3">
               Folder
             </span>
             <select
               value={selectedFolder}
-              onChange={(event) => setSelectedFolder(event.target.value)}
+              onChange={(event) => {
+                setSelectedFolder(event.target.value);
+                guideEvent("folder-filled");
+              }}
               className="mt-1 w-full border border-line bg-panel px-2 py-1.5 font-mono text-[13px] text-ink"
             >
               {options.map((option) => (
@@ -122,7 +133,7 @@ export function NewTopicDialog({
         ) : null}
 
         {needsFolderName ? (
-          <label className="mt-3 block">
+          <label className="mt-3 block" data-guide="folder-input">
             <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3">
               New folder
             </span>
@@ -131,6 +142,9 @@ export function NewTopicDialog({
               onChange={(event) => {
                 setNewFolder(event.target.value);
                 setError(null);
+                if (event.target.value.trim().length > 0) {
+                  guideEvent("folder-filled");
+                }
               }}
               placeholder="Library"
               className="mt-1 w-full border border-line bg-panel px-2 py-1.5 font-mono text-[13px] text-ink placeholder:text-ink-3"
@@ -138,7 +152,7 @@ export function NewTopicDialog({
           </label>
         ) : null}
 
-        <label className="mt-3 block">
+        <label className="mt-3 block" data-guide="title-input">
           <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3">
             Title
           </span>
@@ -148,6 +162,9 @@ export function NewTopicDialog({
             onChange={(event) => {
               setTitle(event.target.value);
               setError(null);
+              if (event.target.value.trim().length > 0) {
+                guideEvent("title-filled");
+              }
             }}
             placeholder="First page"
             className="mt-1 w-full border border-line bg-panel px-2 py-1.5 font-serif text-[15.5px] text-ink placeholder:text-ink-3"
@@ -170,6 +187,7 @@ export function NewTopicDialog({
           </button>
           <button
             type="submit"
+            data-guide="create-btn"
             disabled={pending}
             className="border border-rule bg-paper px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-rule disabled:opacity-40"
           >

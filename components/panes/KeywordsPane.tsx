@@ -13,6 +13,7 @@ import {
   interceptRoutedPaste,
   usePasteRouter,
 } from "@/components/SmartPasteHost";
+import { guideEvent } from "@/lib/onboarding";
 import { localSpellSuggestion, looksMisspelled } from "@/lib/spell";
 
 export function KeywordsPane({
@@ -33,6 +34,7 @@ export function KeywordsPane({
     if (!value) return;
     setDraft("");
     startTransition(() => addKeyword(sectionId, value));
+    guideEvent("keyword-added");
   }
 
   return (
@@ -54,6 +56,7 @@ export function KeywordsPane({
         </p>
       ) : null}
       <input
+        data-guide="keyword-input"
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onPaste={(event) =>

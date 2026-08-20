@@ -6,9 +6,11 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Logo } from "@/components/Logo";
+import { OnboardingGuide } from "@/components/OnboardingGuide";
 import { GlobalSearch } from "@/components/overlays/GlobalSearch";
 import { NewTopicDialog } from "@/components/overlays/NewTopicDialog";
 import { NoteTree } from "@/components/tree/NoteTree";
+import { guideEvent } from "@/lib/onboarding";
 import type { TreeFolder } from "@/lib/tree-types";
 
 export function AppShell({
@@ -29,6 +31,8 @@ export function AppShell({
   const [newTopicFolder, setNewTopicFolder] = useState<string | null | false>(
     false,
   );
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideFromStart, setGuideFromStart] = useState(false);
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -45,10 +49,22 @@ export function AppShell({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Fire guide events on route changes
+  useEffect(() => {
+    if (pathname.startsWith("/n/")) {
+      guideEvent("navigated-to-section");
+    }
+    if (pathname === "/review") {
+      guideEvent("navigated-to-review");
+    }
+  }, [pathname]);
+
   const sidebar = (
     <>
       <div className="flex items-center justify-between gap-2 px-3 py-3">
-        <Logo size={22} />
+        <span data-guide="logo">
+          <Logo size={22} />
+        </span>
         <button
           type="button"
           onClick={() => setSearchOpen(true)}
@@ -59,7 +75,11 @@ export function AppShell({
       </div>
       <button
         type="button"
-        onClick={() => setSearchOpen(true)}
+        data-guide="search"
+        onClick={() => {
+          setSearchOpen(true);
+          guideEvent("search-opened");
+        }}
         className="mx-3 mb-2 flex items-center justify-between border border-line bg-paper px-2 py-1.5 text-left font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3 hover:border-rule hover:text-rule"
       >
         <span>Search notes</span>
@@ -68,6 +88,7 @@ export function AppShell({
       <p className="px-3 pb-2 font-mono text-[11px] text-ink-3">{email}</p>
       <Link
         href="/review"
+        data-guide="review"
         className={`mx-3 mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
           pathname === "/review" ? "text-rule" : "text-ink-3 hover:text-rule"
         }`}
@@ -76,6 +97,7 @@ export function AppShell({
       </Link>
       <button
         type="button"
+        data-guide="new-topic"
         onClick={() => setNewTopicFolder(null)}
         className="mx-3 mb-3 border border-rule px-2 py-1.5 text-left font-mono text-[11px] uppercase tracking-[0.08em] text-rule hover:bg-sunk"
       >
@@ -89,6 +111,20 @@ export function AppShell({
         />
       </div>
       <div className="border-t border-line px-3 py-2">
+        <button
+          type="button"
+          data-guide="guide"
+          onClick={() => {
+            setGuideFromStart(true);
+            setGuideOpen(true);
+            setDrawerOpen(false);
+          }}
+          className={`mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
+            guideOpen ? "text-rule" : "text-ink-3 hover:text-rule"
+          }`}
+        >
+          Guide
+        </button>
         <Link
           href="/support"
           className={`mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${
@@ -173,11 +209,14 @@ export function AppShell({
             className="flex items-center gap-2 text-ink"
           >
             <Menu size={18} strokeWidth={1.75} />
-            <Logo size={20} />
+            <span data-guide="logo">
+              <Logo size={20} />
+            </span>
           </button>
           <div className="flex items-center gap-3">
             <button
               type="button"
+              data-guide="new-topic"
               onClick={() => setNewTopicFolder(null)}
               className="font-mono text-[11px] uppercase tracking-[0.08em] text-rule"
             >
@@ -185,7 +224,11 @@ export function AppShell({
             </button>
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
+              data-guide="search"
+              onClick={() => {
+                setSearchOpen(true);
+                guideEvent("search-opened");
+              }}
               className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3 hover:text-rule"
             >
               Search
@@ -203,6 +246,14 @@ export function AppShell({
           onClose={() => setNewTopicFolder(false)}
         />
       ) : null}
+      <OnboardingGuide
+        open={guideOpen}
+        fromStart={guideFromStart}
+        onOpenChange={(next) => {
+          setGuideOpen(next);
+          if (!next) setGuideFromStart(false);
+        }}
+      />
     </div>
   );
 }

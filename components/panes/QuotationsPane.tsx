@@ -7,6 +7,7 @@ import {
   interceptRoutedPaste,
   usePasteRouter,
 } from "@/components/SmartPasteHost";
+import { guideEvent } from "@/lib/onboarding";
 
 const SOURCES: QuotationSource[] = [
   "SCHOLAR",
@@ -65,6 +66,7 @@ export function QuotationsPane({
       setAttributedTo("");
       setYear("");
       setError(null);
+      guideEvent("quotation-added");
     });
   }
 
@@ -105,10 +107,16 @@ export function QuotationsPane({
         </ul>
       )}
 
-      <div className="mt-6 space-y-2 border-t border-line pt-4">
+      <div data-guide="quotation-form" className="mt-6 space-y-2 border-t border-line pt-4">
         <textarea
+          data-guide="quotation-text"
           value={text}
-          onChange={(event) => setText(event.target.value)}
+          onChange={(event) => {
+            setText(event.target.value);
+            if (event.target.value.trim().length > 0) {
+              guideEvent("quotation-text-filled");
+            }
+          }}
           onPaste={(event) =>
             interceptRoutedPaste(event, paste, (pasted) => pasted.length > 80)
           }
@@ -117,6 +125,7 @@ export function QuotationsPane({
           className="w-full border border-line bg-panel px-2 py-1.5 font-serif text-[15.5px] leading-[1.72] text-ink placeholder:font-sans placeholder:text-[13px] placeholder:text-ink-3"
         />
         <input
+          data-guide="quotation-author"
           value={attributedTo}
           onChange={(event) => setAttributedTo(event.target.value)}
           placeholder="Attributed to"
@@ -151,6 +160,7 @@ export function QuotationsPane({
         ) : null}
         <button
           type="button"
+          data-guide="save-quotation"
           disabled={!canSave || pending}
           onClick={submit}
           className="border border-rule bg-rule px-3 py-1.5 font-sans text-[13px] font-medium text-paper disabled:opacity-40"
