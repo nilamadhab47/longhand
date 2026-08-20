@@ -8,6 +8,7 @@ import {
   replaceKeyword,
 } from "@/app/actions/sections";
 import { runAssist } from "@/app/actions/assist";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { DictateControl } from "@/components/DictateControl";
 import {
   interceptRoutedPaste,
@@ -32,6 +33,7 @@ export function KeywordsPane({
     const value = draft.trim();
     if (!value) return;
     setDraft("");
+    trackEvent(EVENTS.KEYWORD_ADDED);
     startTransition(() => addKeyword(sectionId, value));
   }
 

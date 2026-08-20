@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, Pencil, Plus, Square, Trash2, Volume2 } from "lucide-react";
 import { saveNotes } from "@/app/actions/sections";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { DictateControl } from "@/components/DictateControl";
 import { ClozeDrill } from "@/components/overlays/ClozeDrill";
 import { PasteGuard } from "@/components/overlays/PasteGuard";
@@ -143,6 +144,7 @@ export function NotesPane({
     const point = emptyPoint();
     setPoints((current) => [...current, point]);
     setEditingId(point.id);
+    trackEvent(EVENTS.NOTE_ADDED);
   }
 
   function deletePoint(id: string) {

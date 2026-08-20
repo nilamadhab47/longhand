@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { QuotationSource } from "@prisma/client";
 import { addQuotation, removeQuotation } from "@/app/actions/sections";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import {
   interceptRoutedPaste,
   usePasteRouter,
@@ -61,6 +62,7 @@ export function QuotationsPane({
         setError(result.error);
         return;
       }
+      trackEvent(EVENTS.QUOTATION_ADDED);
       setText("");
       setAttributedTo("");
       setYear("");

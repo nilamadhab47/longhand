@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import type { SearchHit } from "@/lib/search";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 export function GlobalSearch({
   open,
@@ -41,6 +42,7 @@ export function GlobalSearch({
     }
     const controller = new AbortController();
     setLoading(true);
+    trackEvent(EVENTS.SEARCH_USED);
     const t = window.setTimeout(async () => {
       try {
         const [suggestRes, searchRes] = await Promise.all([

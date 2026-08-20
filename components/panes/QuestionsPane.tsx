@@ -7,7 +7,7 @@ import {
   answerMcq,
   saveWrittenAnswer,
 } from "@/app/actions/sections";
-import {
+import { trackEvent, EVENTS } from "@/lib/analytics";import {
   interceptRoutedPaste,
   usePasteRouter,
 } from "@/components/SmartPasteHost";
@@ -185,6 +185,7 @@ function AddQuestionForm({ sectionId }: { sectionId: string }) {
         setError(result.error);
         return;
       }
+      trackEvent(EVENTS.QUESTION_ADDED);
       setStem("");
       setOptions(["", "", "", ""]);
       setCorrect([]);

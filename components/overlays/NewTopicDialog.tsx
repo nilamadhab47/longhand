@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { createTopic } from "@/app/actions/scaffold";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import type { TreeFolder } from "@/lib/tree-types";
 
 export function flattenFolders(
@@ -70,6 +71,7 @@ export function NewTopicDialog({
         setError(result.error);
         return;
       }
+      trackEvent(EVENTS.TOPIC_CREATED);
       onClose();
       if (result.sectionId) {
         router.push(`/n/${result.sectionId}`);

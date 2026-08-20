@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
+import { identifyUser } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
 import { OnboardingGuide } from "@/components/OnboardingGuide";
 import { GlobalSearch } from "@/components/overlays/GlobalSearch";
@@ -35,6 +36,10 @@ export function AppShell({
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    identifyUser(email, email);
+  }, [email]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {

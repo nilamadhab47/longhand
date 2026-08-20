@@ -5,6 +5,7 @@ import {
   IBM_Plex_Serif,
 } from "next/font/google";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import { PwaRegister } from "@/components/PwaRegister";
 import "./globals.css";
 
@@ -68,7 +69,9 @@ export default function RootLayout({
         className={`${plexSans.variable} ${plexSerif.variable} ${plexMono.variable} min-h-dvh bg-paper text-ink antialiased`}
       >
         <PwaRegister />
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
         <InstallPrompt />
       </body>
     </html>

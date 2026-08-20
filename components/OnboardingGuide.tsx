@@ -8,6 +8,7 @@ import {
   writeGuideProgress,
   type GuideProgress,
 } from "@/lib/onboarding";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 export function OnboardingGuide({
   open,
@@ -56,6 +57,7 @@ export function OnboardingGuide({
   }
 
   function startGuide() {
+    trackEvent(EVENTS.GUIDE_STARTED);
     save({ phase: "active", stepIndex: 0 });
   }
 
@@ -75,11 +77,13 @@ export function OnboardingGuide({
   }
 
   function dismiss() {
+    trackEvent(EVENTS.GUIDE_SKIPPED, { step: progress.stepIndex });
     save({ phase: "hidden", stepIndex: progress.stepIndex });
     onOpenChange(false);
   }
 
   function finish() {
+    trackEvent(EVENTS.GUIDE_COMPLETED);
     save({ phase: "hidden", stepIndex: 0 });
     onOpenChange(false);
   }
