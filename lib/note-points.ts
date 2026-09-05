@@ -53,10 +53,14 @@ export function readPointsDoc(content: string): NotePoint[] | null {
   return null;
 }
 
+export function pointHasContent(html: string) {
+  return stripHtml(html).length > 0 || /<img\b/i.test(html);
+}
+
 export function parseNotePoints(content: string): NotePoint[] {
   const doc = readPointsDoc(content);
   if (doc) {
-    return doc.filter((point) => stripHtml(point.html).length > 0);
+    return doc.filter((point) => pointHasContent(point.html));
   }
   if (content.trim().length === 0) return [];
   return [{ id: newPointId(), html: toEditorHtml(content) }];

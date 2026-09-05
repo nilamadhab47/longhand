@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Check, Pencil, Plus, Square, Trash2, Volume2 } from "lucide-react";
+import { Check, ImagePlus, Pencil, Plus, Square, Trash2, Volume2 } from "lucide-react";
 import { saveNotes } from "@/app/actions/sections";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { DictateControl } from "@/components/DictateControl";
 import { ClozeDrill } from "@/components/overlays/ClozeDrill";
 import { PasteGuard } from "@/components/overlays/PasteGuard";
 import { NotesEditor } from "@/components/panes/NotesEditor";
-import { escapeText, stripHtml, toEditorHtml } from "@/lib/html";
+import { escapeText, toEditorHtml } from "@/lib/html";
+import { attachNoteImage } from "@/lib/note-image";
 import {
   emptyPoint,
   notesWordCount,
   parseNotePoints,
+  pointHasContent,
   pointsPlainText,
   serializeNotePoints,
   type NotePoint,
@@ -37,6 +39,8 @@ export function NotesPane({
   const [drillOpen, setDrillOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [addingPhoto, setAddingPhoto] = useState(false);
 
   const serialized = serializeNotePoints(points);
   const serializedRef = useRef(serialized);
@@ -154,11 +158,27 @@ export function NotesPane({
 
   function doneEditing(id: string) {
     setPoints((current) =>
-      current.filter(
-        (point) => point.id !== id || stripHtml(point.html).length > 0,
-      ),
+      current.filter((point) => point.id !== id || pointHasContent(point.html)),
     );
     setEditingId(null);
+  }
+
+  async function addFromImage(file: File) {
+    setImageError(null);
+    setAddingPhoto(true);
+    try {
+      const html = await attachNoteImage(file);
+      const point = emptyPoint();
+      setPoints((current) => [...current, { ...point, html }]);
+      setEditingId(null);
+      trackEvent(EVENTS.NOTE_ADDED);
+    } catch (cause) {
+      setImageError(
+        cause instanceof Error ? cause.message : "Could not add that image.",
+      );
+    } finally {
+      setAddingPhoto(false);
+    }
   }
 
   function addFromPaste(bullets: string[]) {
@@ -218,7 +238,7 @@ export function NotesPane({
       <ul className="space-y-3">
         {points.map((point, index) => {
           const editing = editingId === point.id;
-          const text = stripHtml(point.html);
+          const hasContent = pointHasContent(point.html);
           return (
             <li key={point.id} className="flex items-start gap-2">
               <span
@@ -239,10 +259,9 @@ export function NotesPane({
                     data-notes-editor
                     className="font-serif text-[15.5px] leading-[1.72] text-ink"
                     dangerouslySetInnerHTML={{
-                      __html:
-                        text.length > 0
-                          ? toEditorHtml(point.html)
-                          : '<em class="text-ink-3">Empty</em>',
+                      __html: hasContent
+                        ? toEditorHtml(point.html)
+                        : '<em class="text-ink-3">Empty</em>',
                     }}
                   />
                 )}
@@ -275,11 +294,36 @@ export function NotesPane({
           );
         })}
       </ul>
-      <div className="mt-2">
+      <div className="mt-2 flex items-center gap-1">
         <IconButton label="Add point" onClick={addPoint} tone="rule">
           <Plus size={14} strokeWidth={1.75} />
         </IconButton>
+        <label
+          className={`inline-flex cursor-pointer items-center gap-1 p-1 text-rule hover:text-rule ${
+            addingPhoto ? "pointer-events-none opacity-40" : ""
+          }`}
+          title="Add photo"
+        >
+          <ImagePlus size={14} strokeWidth={1.75} />
+          <span className="sr-only">Add photo</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="sr-only"
+            disabled={addingPhoto}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) void addFromImage(file);
+            }}
+          />
+        </label>
       </div>
+      {imageError ? (
+        <p className="mt-1 font-serif text-[13px] italic text-rule" role="status">
+          {imageError}
+        </p>
+      ) : null}
       <div className="mt-1 flex items-center justify-end gap-2 font-mono text-[11px] text-ink-3">
         {saveState !== "idle" ? (
           <>

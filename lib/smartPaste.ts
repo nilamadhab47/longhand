@@ -1,5 +1,5 @@
 import { QuestionKind, QuotationSource } from "@prisma/client";
-import { callForcedTool, hashBytes, type ImagePayload } from "@/lib/ai/haiku";
+import { callForcedTool, hashBytes } from "@/lib/ai/haiku";
 
 export type RoutedQuotation = {
   text: string;
@@ -208,17 +208,14 @@ suggestedTopic is an existing title from the provided list, or a short new path 
 
 export async function routePasted(input: {
   text: string;
-  image?: ImagePayload;
   topicTitles: string[];
 }): Promise<RouteResult | { error: string }> {
-  if (!input.image) {
-    const local = routeLocal(input.text);
-    if (local) return local;
-  }
+  const local = routeLocal(input.text);
+  if (local) return local;
 
   const titles = input.topicTitles.slice(0, 60).join("\n");
   const cacheKey = hashBytes(
-    `route_pasted_content\n${input.image?.data ?? input.text}\n${titles}`,
+    `route_pasted_content\n${input.text}\n${titles}`,
   );
 
   const result = await callForcedTool<Omit<RouteResult, "tier">>({
@@ -227,10 +224,7 @@ export async function routePasted(input: {
     description: "Sort pasted study material into files. Extract only.",
     schema: ROUTE_SCHEMA,
     system: SYSTEM,
-    userText: input.image
-      ? `Existing topics:\n${titles || "(none)"}\n\nExtract from this image. Extra caption:\n${input.text}`
-      : `Existing topics:\n${titles || "(none)"}\n\nPasted text:\n${input.text}`,
-    image: input.image,
+    userText: `Existing topics:\n${titles || "(none)"}\n\nPasted text:\n${input.text}`,
   });
 
   if (!result.ok && result.reason === "capped") {

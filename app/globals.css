@@ -141,6 +141,13 @@ body[data-scroll-locked] {
   text-underline-offset: 2px;
 }
 
+[data-notes-editor] img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.4em 0;
+}
+
 .assist-flash {
   animation: assist-underline 1.6s ease-out forwards;
   text-decoration-line: underline;

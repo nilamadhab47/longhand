@@ -7,17 +7,14 @@ import {
   type ClipboardEvent,
   type ReactNode,
 } from "react";
-import { ImagePlus } from "lucide-react";
 import { appendNotePoints, routePaste } from "@/app/actions/paste";
 import { PasteGuard } from "@/components/overlays/PasteGuard";
 import { PasteReview } from "@/components/overlays/PasteReview";
-import type { ImagePayload } from "@/lib/ai/haiku";
 import type { RouteResult } from "@/lib/smartPaste";
 
 type PasteApi = {
   pending: boolean;
   routeText: (text: string) => void;
-  routeImage: (image: ImagePayload) => void;
 };
 
 const PasteContext = createContext<PasteApi | null>(null);
@@ -38,10 +35,10 @@ export function SmartPasteHost({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  async function run(text: string, image?: ImagePayload) {
+  async function run(text: string) {
     setPending(true);
     setError(null);
-    const result = await routePaste({ text, image });
+    const result = await routePaste({ text });
     setPending(false);
     if ("error" in result) {
       setError(result.error);
@@ -55,37 +52,16 @@ export function SmartPasteHost({
     routeText: (text) => {
       void run(text);
     },
-    routeImage: (image) => {
-      void run("", image);
-    },
   };
 
   return (
     <PasteContext.Provider value={api}>
-      <div className="mb-3 flex items-center gap-2">
-        <label className="inline-flex cursor-pointer items-center gap-1 text-ink-3 hover:text-rule">
-          <ImagePlus size={14} strokeWidth={1.75} />
-          <span className="sr-only">Upload image to route</span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="sr-only"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = "";
-              if (file) void fileToImage(file).then((image) => run("", image));
-            }}
-          />
-        </label>
-        {pending ? (
-          <span className="font-mono text-[11px] text-ink-3">Routing…</span>
-        ) : null}
-        {error ? (
-          <span className="font-serif text-[13px] italic text-rule">
-            {error}
-          </span>
-        ) : null}
-      </div>
+      {pending ? (
+        <p className="mb-3 font-mono text-[11px] text-ink-3">Routing…</p>
+      ) : null}
+      {error ? (
+        <p className="mb-3 font-serif text-[13px] italic text-rule">{error}</p>
+      ) : null}
       {children}
       {review ? (
         <PasteReview
@@ -123,7 +99,6 @@ export function interceptRoutedPaste(
   );
   if (file) {
     event.preventDefault();
-    void fileToImage(file).then((image) => api.routeImage(image));
     return;
   }
   const text = event.clipboardData.getData("text/plain");
@@ -131,29 +106,4 @@ export function interceptRoutedPaste(
     event.preventDefault();
     api.routeText(text);
   }
-}
-
-export async function fileToImage(file: File): Promise<ImagePayload> {
-  const data = await readAsBase64(file);
-  const mediaType = (
-    file.type === "image/png" ||
-    file.type === "image/webp" ||
-    file.type === "image/gif"
-      ? file.type
-      : "image/jpeg"
-  ) as ImagePayload["mediaType"];
-  return { mediaType, data };
-}
-
-function readAsBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      const comma = result.indexOf(",");
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
 }

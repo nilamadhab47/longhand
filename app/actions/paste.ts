@@ -17,15 +17,13 @@ import {
   type RoutedQuestion,
   type RoutedQuotation,
 } from "@/lib/smartPaste";
-import type { ImagePayload } from "@/lib/ai/haiku";
 
 export async function routePaste(input: {
   text: string;
-  image?: ImagePayload;
 }): Promise<RouteResult | { error: string }> {
   const { userId } = await requireUser();
   const text = input.text.trim();
-  if (text.length === 0 && !input.image) {
+  if (text.length === 0) {
     return { error: "Nothing to route." };
   }
 
@@ -38,7 +36,6 @@ export async function routePaste(input: {
 
   return routePasted({
     text,
-    image: input.image,
     topicTitles: topics.map((topic) => topic.title),
   });
 }
