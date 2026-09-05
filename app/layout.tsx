@@ -7,6 +7,7 @@ import {
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { PwaRegister } from "@/components/PwaRegister";
+import { posthogBrowserConfig } from "@/lib/posthog-config";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans_Condensed({
@@ -63,13 +64,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const posthog = posthogBrowserConfig();
+
   return (
     <html lang="en">
       <body
         className={`${plexSans.variable} ${plexSerif.variable} ${plexMono.variable} min-h-dvh bg-paper text-ink antialiased`}
       >
         <PwaRegister />
-        <PostHogProvider>
+        <PostHogProvider projectKey={posthog.projectKey} host={posthog.host}>
           {children}
         </PostHogProvider>
         <InstallPrompt />
