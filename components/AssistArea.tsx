@@ -12,6 +12,7 @@ import {
 } from "react";
 import { Loader2, SparklesIcon, WandSparkles, CheckCheck } from "lucide-react";
 import { runAssist, type AssistResult } from "@/app/actions/assist";
+import { EVENTS, trackEvent } from "@/lib/analytics";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -188,6 +189,7 @@ export function AssistArea({
     async (operation: AssistOperation) => {
       if (!capture) return;
       setActive({ status: "loading", capture, operation });
+      trackEvent(EVENTS.ASSIST_USED, { operation, mode: capture.mode });
       const result = await runAssist({
         operation,
         mode: capture.mode,

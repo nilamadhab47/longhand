@@ -9,6 +9,7 @@ import {
 } from "@elevenlabs/client";
 import { Mic, Square } from "lucide-react";
 import { DictateReview } from "@/components/overlays/DictateReview";
+import { EVENTS, trackEvent } from "@/lib/analytics";
 import {
   describeSpeechError,
   isSpeechRecognitionSupported,
@@ -223,6 +224,7 @@ export function DictateControl({
       scribeRef.current = connection;
       startElapsed();
       setListening(true);
+      trackEvent(EVENTS.SPEAK_USED, { target, provider: "elevenlabs" });
     } catch {
       setError("Could not open the microphone for live dictation.");
     }
@@ -284,6 +286,7 @@ export function DictateControl({
       recognition.start();
       startElapsed();
       setListening(true);
+      trackEvent(EVENTS.SPEAK_USED, { target, provider: "browser" });
     } catch {
       setError("Could not start the microphone.");
       wantListenRef.current = false;

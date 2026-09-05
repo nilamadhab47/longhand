@@ -104,6 +104,7 @@ function KeywordChip({
       startTransition(() => replaceKeyword(sectionId, keyword, local));
       return;
     }
+    trackEvent(EVENTS.ASSIST_USED, { operation: "spell", mode: "prose" });
     const result = await runAssist({
       operation: "spell",
       mode: "prose",

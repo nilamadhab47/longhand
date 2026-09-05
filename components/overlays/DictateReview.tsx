@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { runDictateRefine } from "@/app/actions/assist";
+import { EVENTS, trackEvent } from "@/lib/analytics";
 import { splitSpokenKeywords, splitSpokenNotes } from "@/lib/speech";
 
 export function DictateReview({
@@ -32,6 +33,7 @@ export function DictateReview({
   async function refine() {
     setPending(true);
     setError(null);
+    trackEvent(EVENTS.ASSIST_USED, { operation: "dictate_refine", target });
     const result = await runDictateRefine({
       transcript,
       target,
