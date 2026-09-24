@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  fileToImage,
-  usePasteRouter,
-} from "@/components/SmartPasteHost";
+import { ImagePlus } from "lucide-react";
+import { attachNoteImage } from "@/lib/note-image";
 import { toEditorHtml } from "@/lib/html";
 
 type Mark = "bold" | "italic" | "underline";
@@ -23,12 +21,14 @@ export function NotesEditor({
   autoFocus?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const paste = usePasteRouter();
+  const rangeRef = useRef<Range | null>(null);
   const [marks, setMarks] = useState<Record<Mark, boolean>>({
     bold: false,
     italic: false,
     underline: false,
   });
+  const [error, setError] = useState<string | null>(null);
+  const [addingPhoto, setAddingPhoto] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -45,6 +45,24 @@ export function NotesEditor({
     onChange(ref.current?.innerHTML ?? "");
   }
 
+  function rememberRange() {
+    const selection = window.getSelection();
+    if (selection?.rangeCount) {
+      rangeRef.current = selection.getRangeAt(0).cloneRange();
+    }
+  }
+
+  function restoreRange() {
+    const selection = window.getSelection();
+    const range = rangeRef.current;
+    if (!selection || !range) {
+      ref.current?.focus();
+      return;
+    }
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
   function syncMarks() {
     setMarks({
       bold: document.queryCommandState("bold"),
@@ -58,6 +76,23 @@ export function NotesEditor({
     document.execCommand(command, false);
     emit();
     syncMarks();
+  }
+
+  async function insertImage(file: File) {
+    setError(null);
+    setAddingPhoto(true);
+    try {
+      const markup = await attachNoteImage(file);
+      restoreRange();
+      document.execCommand("insertHTML", false, markup);
+      emit();
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not add that image.",
+      );
+    } finally {
+      setAddingPhoto(false);
+    }
   }
 
   return (
@@ -84,6 +119,32 @@ export function NotesEditor({
           onClick={() => run("underline")}
           className="underline"
         />
+        <span aria-hidden className="mx-1 h-4 w-px bg-line" />
+        <label
+          className={`inline-flex h-7 cursor-pointer items-center gap-1 px-1.5 text-ink-2 hover:text-ink ${
+            addingPhoto ? "pointer-events-none opacity-40" : ""
+          }`}
+          onMouseDown={(event) => {
+            event.preventDefault();
+            rememberRange();
+          }}
+        >
+          <ImagePlus size={13} strokeWidth={1.75} />
+          <span className="font-mono text-[10px] uppercase tracking-[0.08em]">
+            {addingPhoto ? "Adding" : "Photo"}
+          </span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="sr-only"
+            disabled={addingPhoto}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) void insertImage(file);
+            }}
+          />
+        </label>
       </div>
       <div
         ref={ref}
@@ -101,9 +162,10 @@ export function NotesEditor({
           const file = [...event.clipboardData.files].find((item) =>
             item.type.startsWith("image/"),
           );
-          if (file && paste) {
+          if (file) {
             event.preventDefault();
-            void fileToImage(file).then((image) => paste.routeImage(image));
+            rememberRange();
+            void insertImage(file);
             return;
           }
           const pasted = event.clipboardData.getData("text/plain");
@@ -118,6 +180,11 @@ export function NotesEditor({
         }}
         className="min-h-[88px] px-3 py-2 font-serif text-[15.5px] leading-[1.72] text-ink outline-none"
       />
+      {error ? (
+        <p className="border-t border-line px-3 py-1.5 font-serif text-[13px] italic text-rule">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

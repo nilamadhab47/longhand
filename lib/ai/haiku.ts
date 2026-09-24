@@ -3,12 +3,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { canCallApi, recordSpend } from "@/lib/ai/spend";
 
-export const HAIKU_MODEL = "claude-haiku-4-5-20251001";
-
-export type ImagePayload = {
-  mediaType: "image/jpeg" | "image/png" | "image/webp" | "image/gif";
-  data: string;
-};
+/** Current Haiku. Alias for the latest 4.5 snapshot (`claude-haiku-4-5-20251001`). */
+export const HAIKU_MODEL = "claude-haiku-4-5";
 
 export type ToolCallOk<T> = {
   ok: true;
@@ -32,7 +28,6 @@ export async function callForcedTool<T>(input: {
   schema: Record<string, unknown>;
   system: string;
   userText: string;
-  image?: ImagePayload;
 }): Promise<ToolCallOk<T> | ToolCallFail> {
   const cached = await prisma.pasteRouteCache.findUnique({
     where: { hash: input.cacheKey },
@@ -51,20 +46,6 @@ export async function callForcedTool<T>(input: {
   }
 
   const client = new Anthropic({ apiKey: key });
-  const userContent: Anthropic.MessageCreateParams["messages"][number]["content"] =
-    input.image
-      ? [
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: input.image.mediaType,
-              data: input.image.data,
-            },
-          },
-          { type: "text", text: input.userText },
-        ]
-      : input.userText;
 
   try {
     const message = await client.messages.create({
@@ -79,7 +60,7 @@ export async function callForcedTool<T>(input: {
           input_schema: input.schema as Anthropic.Tool.InputSchema,
         },
       ],
-      messages: [{ role: "user", content: userContent }],
+      messages: [{ role: "user", content: input.userText }],
     });
 
     const usd = await recordSpend(

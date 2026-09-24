@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { submitReview } from "@/app/actions/review";
+import { EVENTS, trackEvent } from "@/lib/analytics";
 
 export function ClozeDrill({
   noteId,
@@ -19,6 +20,10 @@ export function ClozeDrill({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const hasContent = prose.trim().length > 0;
+
+  useEffect(() => {
+    trackEvent(EVENTS.REVIEW_STARTED, { noteId });
+  }, [noteId]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -39,6 +44,7 @@ export function ClozeDrill({
         setError(result.error);
         return;
       }
+      trackEvent(EVENTS.REVIEW_COMPLETED, { noteId, quality });
       onClose();
     });
   }

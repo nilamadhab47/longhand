@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_ID: BUILD_ID,
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "4mb",
+    },
+  },
   async headers() {
     return [
       {

@@ -52,7 +52,7 @@ writing it, you have misunderstood the product. Stop and flag it.
 | DB | PostgreSQL (Neon or Supabase) | |
 | ORM | Prisma | |
 | Auth | Email + password | HttpOnly session cookie. No Clerk. |
-| AI | Anthropic SDK, `claude-haiku-4-5-20251001` | Haiku only. See §7. |
+| AI | Anthropic SDK, `claude-haiku-4-5` | Haiku only. See §7. |
 | Icons | `lucide-react` | |
 | Client | **PWA only** | No React Native. TWA wrap via Bubblewrap later. |
 | Deploy | Vercel | |
