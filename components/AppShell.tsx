@@ -14,11 +14,13 @@ import { NoteTree } from "@/components/tree/NoteTree";
 import type { TreeFolder } from "@/lib/tree-types";
 
 export function AppShell({
-  email,
+  userId,
+  account,
   folders,
   children,
 }: {
-  email: string;
+  userId: string;
+  account: string;
   folders: TreeFolder[];
   children: React.ReactNode;
 }) {
@@ -38,8 +40,8 @@ export function AppShell({
   }, [pathname]);
 
   useEffect(() => {
-    identifyUser(email, email);
-  }, [email]);
+    identifyUser(userId);
+  }, [userId]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -72,7 +74,7 @@ export function AppShell({
         <span>Search notes</span>
         <span className="text-ink-3">⌘K</span>
       </button>
-      <p className="px-3 pb-2 font-mono text-[11px] text-ink-3">{email}</p>
+      <p className="px-3 pb-2 font-mono text-[11px] text-ink-3">{account}</p>
       <Link
         href="/review"
         className={`mx-3 mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] ${

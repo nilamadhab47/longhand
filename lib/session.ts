@@ -7,7 +7,7 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 export type Session = {
   userId: string;
-  email: string;
+  label: string;
 };
 
 function sessionSecret() {
@@ -18,8 +18,8 @@ function sessionSecret() {
   return new TextEncoder().encode(value);
 }
 
-export async function createSession(userId: string, email: string) {
-  const token = await new SignJWT({ email })
+export async function createSession(userId: string, label: string) {
+  const token = await new SignJWT({ label })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(userId)
     .setIssuedAt()
@@ -54,11 +54,16 @@ export async function verifySessionToken(
   try {
     const { payload } = await jwtVerify(token, sessionSecret());
     const userId = payload.sub;
-    const email = payload.email;
-    if (typeof userId !== "string" || typeof email !== "string") {
+    const label =
+      typeof payload.label === "string"
+        ? payload.label
+        : typeof payload.email === "string"
+          ? payload.email
+          : null;
+    if (typeof userId !== "string" || !label) {
       return null;
     }
-    return { userId, email };
+    return { userId, label };
   } catch {
     return null;
   }

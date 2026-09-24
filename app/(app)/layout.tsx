@@ -11,7 +11,7 @@ export default async function AppLayout({
   const folders = await loadTree(session.userId);
 
   return (
-    <AppShell email={session.email} folders={folders}>
+    <AppShell userId={session.userId} account={session.label} folders={folders}>
       {children}
     </AppShell>
   );

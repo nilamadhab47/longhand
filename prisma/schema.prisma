@@ -58,8 +58,9 @@ enum AuditStatus {
 
 model User {
   id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
+  email        String?  @unique
+  phone        String?  @unique
+  passwordHash String?
   createdAt    DateTime @default(now())
 
   folders   Folder[]

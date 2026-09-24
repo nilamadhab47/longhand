@@ -3,9 +3,12 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
+import { accountLabel, normalizePhone } from "@/lib/phone";
 import { createSession, destroySession } from "@/lib/session";
+import { checkPhoneCode, sendPhoneCode } from "@/lib/twilio-verify";
 
-export type AuthState = { error: string } | undefined;
+export type AuthError = { error: string };
+export type AuthState = AuthError | { sent: true; phone: string } | undefined;
 
 function readCredentials(formData: FormData) {
   const email = String(formData.get("email") ?? "")
@@ -16,27 +19,31 @@ function readCredentials(formData: FormData) {
 }
 
 export async function signIn(
-  _prev: AuthState,
+  _prev: AuthError | undefined,
   formData: FormData,
-): Promise<AuthState> {
+): Promise<AuthError | undefined> {
   const { email, password } = readCredentials(formData);
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+  if (
+    !user ||
+    !user.passwordHash ||
+    !(await verifyPassword(password, user.passwordHash))
+  ) {
     return { error: "Email or password is wrong." };
   }
 
-  await createSession(user.id, user.email);
+  await createSession(user.id, accountLabel(user));
   redirect("/review");
 }
 
 export async function signUp(
-  _prev: AuthState,
+  _prev: AuthError | undefined,
   formData: FormData,
-): Promise<AuthState> {
+): Promise<AuthError | undefined> {
   const { email, password } = readCredentials(formData);
   if (!email || !email.includes("@")) {
     return { error: "Use a real email address." };
@@ -57,7 +64,63 @@ export async function signUp(
     },
   });
 
-  await createSession(user.id, user.email);
+  await createSession(user.id, accountLabel(user));
+  redirect("/review");
+}
+
+function readPhone(formData: FormData) {
+  return normalizePhone(String(formData.get("phone") ?? ""));
+}
+
+export async function sendPhoneCodeAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const parsed = readPhone(formData);
+  if ("error" in parsed) {
+    return { error: parsed.error };
+  }
+
+  try {
+    await sendPhoneCode(parsed.phone);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Could not send the code.";
+    return { error: message };
+  }
+
+  return { sent: true, phone: parsed.phone };
+}
+
+export async function verifyPhoneCodeAction(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const parsed = readPhone(formData);
+  if ("error" in parsed) {
+    return { error: parsed.error };
+  }
+
+  const code = String(formData.get("code") ?? "").replace(/\D/g, "");
+  if (!/^\d{4,10}$/.test(code)) {
+    return { error: "Enter the code from the text message." };
+  }
+
+  try {
+    await checkPhoneCode(parsed.phone, code);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "That code is wrong or expired.";
+    return { error: message };
+  }
+
+  const user = await prisma.user.upsert({
+    where: { phone: parsed.phone },
+    create: { phone: parsed.phone },
+    update: {},
+  });
+
+  await createSession(user.id, accountLabel(user));
   redirect("/review");
 }
 
